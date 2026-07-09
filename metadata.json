@@ -1,0 +1,6 @@
+{
+  "name": "Rádio Rock - Nordeste Loc",
+  "description": "Uma interface de rádio rock séria e completa com mais de 70 faixas divididas em Atos, busca automática do YouTube e download de áudio organizado em pastas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
