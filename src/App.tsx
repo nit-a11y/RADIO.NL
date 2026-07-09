@@ -5,6 +5,7 @@ import DiaDoRockCover from "./components/DiaDoRockCover";
 import CardRadialSpectrogram from "./components/CardRadialSpectrogram";
 import CardBackgroundSpectrogram from "./components/CardBackgroundSpectrogram";
 import PlaylistAccordion from "./components/PlaylistAccordion";
+import bgImage from "./assets/images/rock_radio_bg_1783539455652.jpg";
 import {
   Play,
   Pause,
@@ -272,7 +273,7 @@ export default function App() {
       <div 
         className="fixed inset-0 bg-cover bg-center bg-no-repeat pointer-events-none z-0 transform scale-105"
         style={{ 
-          backgroundImage: "url('/src/assets/images/rock_radio_bg_1783539455652.jpg')",
+          backgroundImage: `url(${bgImage})`,
           filter: "brightness(0.65) contrast(1.1)"
         }}
       />
