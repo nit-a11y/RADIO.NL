@@ -290,10 +290,10 @@ export default function App() {
         >
           {/* Main heading styled like a metal stencil/sticker */}
           <div className="bg-black/95 text-white font-sans font-black text-sm sm:text-base md:text-lg tracking-widest px-6 py-2 rounded-md shadow-2xl border border-zinc-800 uppercase inline-block">
-            QUE MÚSICA DE ROCK
+            DIA DO ROCK
           </div>
           <div className="bg-black/95 text-red-500 font-sans font-black text-sm sm:text-base md:text-lg tracking-widest px-6 py-2 rounded-md shadow-2xl border border-red-950 uppercase inline-block -mt-1">
-            NÃO SAI DA SUA PLAYLIST?
+            NORDESTE LOCAÇÕES
           </div>
         </motion.div>
       </header>
