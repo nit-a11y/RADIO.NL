@@ -6,11 +6,23 @@ interface DiaDoRockCoverProps {
 }
 
 export default function DiaDoRockCover({ isPlaying }: DiaDoRockCoverProps) {
-  const numberOfBars = 64; // Increased density for a cooler look
+  const numberOfBars = 36;
   const bars = React.useMemo(() => {
     return Array.from({ length: numberOfBars }).map((_, i) => {
       const angle = (i * 360) / numberOfBars;
-      return { angle, i };
+      const angleRad = (angle * Math.PI) / 180;
+      const rStart = 111;
+      return {
+        i,
+        baseX2: 150 + (rStart + 3) * Math.cos(angleRad),
+        baseY2: 150 + (rStart + 3) * Math.sin(angleRad),
+        maxX2: 150 + (rStart + 8 + (i % 11) * 2) * Math.cos(angleRad),
+        maxY2: 150 + (rStart + 8 + (i % 11) * 2) * Math.sin(angleRad),
+        x1: 150 + rStart * Math.cos(angleRad),
+        y1: 150 + rStart * Math.sin(angleRad),
+        angleRad,
+        color: i % 3 === 0 ? "#ef4444" : i % 3 === 1 ? "#dc2626" : "#7f1d1d",
+      };
     });
   }, []);
 
@@ -33,43 +45,29 @@ export default function DiaDoRockCover({ isPlaying }: DiaDoRockCoverProps) {
       {/* 1. Pulsing Radial Spectrogram Layer (Behind/around the Vinyl Record) */}
       <div className="absolute inset-0 w-full h-full pointer-events-none z-0 flex items-center justify-center">
         <svg viewBox="0 0 300 300" className="w-[112%] h-[112%]">
-          {bars.map((bar) => {
-            const angleRad = (bar.angle * Math.PI) / 180;
-            // Emerge exactly from the outer border of the vinyl record (r ~ 110)
-            const rStart = 111;
-
-            return (
-              <motion.line
-                key={bar.i}
-                x1={150 + rStart * Math.cos(angleRad)}
-                y1={150 + rStart * Math.sin(angleRad)}
-                animate={isPlaying ? {
-                  x2: [
-                    150 + (rStart + 3) * Math.cos(angleRad),
-                    150 + (rStart + 8 + Math.random() * 22) * Math.cos(angleRad),
-                    150 + (rStart + 3) * Math.cos(angleRad)
-                  ],
-                } : {
-                  x2: 150 + (rStart + 2) * Math.cos(angleRad),
-                }}
-                transition={{
-                  duration: 0.3 + (bar.i % 5) * 0.08,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                stroke={
-                  bar.i % 3 === 0
-                    ? "#ef4444" // Bright Red
-                    : bar.i % 3 === 1
-                      ? "#dc2626" // Solid Red
-                      : "#7f1d1d" // Dark Maroon
-                }
-                strokeWidth="2"
-                strokeLinecap="round"
-                opacity={isPlaying ? 0.85 : 0.25}
-              />
-            );
-          })}
+          {bars.map((bar) => (
+            <motion.line
+              key={bar.i}
+              x1={bar.x1}
+              y1={bar.y1}
+              animate={isPlaying ? {
+                x2: [bar.baseX2, bar.maxX2, bar.baseX2],
+                y2: [bar.baseY2, bar.maxY2, bar.baseY2],
+              } : {
+                x2: bar.baseX2,
+                y2: bar.baseY2,
+              }}
+              transition={{
+                duration: 0.3 + (bar.i % 5) * 0.08,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              stroke={bar.color}
+              strokeWidth="2"
+              strokeLinecap="round"
+              opacity={isPlaying ? 0.85 : 0.25}
+            />
+          ))}
         </svg>
       </div>
 

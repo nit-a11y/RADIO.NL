@@ -75,8 +75,10 @@ export default function YouTubePlayer({
 
   // 1. Resolve Video ID automatically when searchQuery changes
   useEffect(() => {
+    setResolvedVideoId(null);
+
     if (!searchQuery) {
-      setResolvedVideoId(null);
+      onLoadingStatus(false);
       return;
     }
 
@@ -84,8 +86,10 @@ export default function YouTubePlayer({
     async function resolveTrack() {
       if (queryCache.current[searchQuery!]) {
         const cached = queryCache.current[searchQuery!];
-        setResolvedVideoId(cached.id);
-        onVideoResolved(cached.id, cached.duration);
+        if (active) {
+          setResolvedVideoId(cached.id);
+          onVideoResolved(cached.id, cached.duration);
+        }
         return;
       }
 
@@ -96,11 +100,8 @@ export default function YouTubePlayer({
         if (!response.ok) throw new Error("Search failed");
         const data = await response.json();
         
-        if (data.id) {
-          queryCache.current[searchQuery!] = { id: data.id, duration: data.duration || "3:30" };
-        }
-
         if (active && data.id) {
+          queryCache.current[searchQuery!] = { id: data.id, duration: data.duration || "3:30" };
           setResolvedVideoId(data.id);
           onVideoResolved(data.id, data.duration || "3:30");
         }

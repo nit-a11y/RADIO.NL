@@ -5,7 +5,7 @@ interface CardRadialSpectrogramProps {
   isPlaying: boolean;
 }
 
-const BAR_COUNT = 80;
+const BAR_COUNT = 30;
 const R_START = 210;
 
 export default function CardRadialSpectrogram({ isPlaying }: CardRadialSpectrogramProps) {

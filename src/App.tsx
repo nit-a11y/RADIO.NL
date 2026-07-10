@@ -4,7 +4,7 @@ import YouTubePlayer from "./components/YouTubePlayer";
 import DiaDoRockCover from "./components/DiaDoRockCover";
 import CardRadialSpectrogram from "./components/CardRadialSpectrogram";
 import CardBackgroundSpectrogram from "./components/CardBackgroundSpectrogram";
-import PlaylistAccordion from "./components/PlaylistAccordion";
+import FlatPlaylist from "./components/FlatPlaylist";
 import bgImage from "./assets/images/rock_radio_bg_1783539455652.jpg";
 import {
   Play,
@@ -534,7 +534,7 @@ export default function App() {
                       Playlist Completa
                     </h2>
                     <p className="text-[10px] font-mono text-zinc-500">
-                      {playlistData.reduce((acc, act) => acc + act.tracks.length, 0)} músicas • 8 Atos
+                      {playlistData.reduce((acc, act) => acc + act.tracks.length, 0)} músicas
                     </p>
                   </div>
                 </div>
@@ -549,7 +549,7 @@ export default function App() {
 
               {/* Playlist Content */}
               <div className="flex-1 overflow-y-auto p-4">
-                <PlaylistAccordion
+                <FlatPlaylist
                   acts={playlistData}
                   activeTrack={activeTrack}
                   isPlaying={isPlaying}

@@ -6,7 +6,7 @@ interface CardBackgroundSpectrogramProps {
 }
 
 export default function CardBackgroundSpectrogram({ isPlaying }: CardBackgroundSpectrogramProps) {
-  const barCount = 44;
+  const barCount = 24;
   const bars = React.useMemo(() => {
     return Array.from({ length: barCount }).map((_, i) => {
       const duration = 0.35 + (i % 6) * 0.07;
