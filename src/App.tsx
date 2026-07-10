@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { playlistData, Track, Act } from "./playlistData";
 import YouTubePlayer from "./components/YouTubePlayer";
 import DiaDoRockCover from "./components/DiaDoRockCover";
@@ -15,12 +15,6 @@ import {
   RotateCw,
   Volume2,
   VolumeX,
-  Radio,
-  Sparkles,
-  HelpCircle,
-  Share2,
-  ChevronDown,
-  ChevronUp,
   ListMusic,
   X
 } from "lucide-react";
@@ -113,21 +107,21 @@ export default function App() {
     }
   };
 
-  const nextTrackInfo = getNextTrack();
+  const nextTrackInfo = useMemo(() => getNextTrack(), [activeTrack, isShuffle, repeatMode]);
 
   // 2. Playback logic controls
-  const handlePlayPause = () => {
-    setIsPlaying(!isPlaying);
-  };
+  const handlePlayPause = useCallback(() => {
+    setIsPlaying((prev) => !prev);
+  }, []);
 
-  const handleSelectTrack = (track: Track, act: Act) => {
+  const handleSelectTrack = useCallback((track: Track, act: Act) => {
     setActiveAct(act);
     setActiveTrack(track);
     setIsPlaying(true);
-  };
+  }, []);
 
   // Skip Forward Logic
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     // A. Shuffle mode
     if (isShuffle) {
       const allTracks: { track: Track; act: Act }[] = [];
@@ -190,10 +184,10 @@ export default function App() {
         setIsPlaying(false);
       }
     }
-  };
+  }, [isShuffle, repeatMode, activeTrack]);
 
   // Skip Backward Logic
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     let foundActIndex = -1;
     let foundTrackIndex = -1;
 
@@ -243,10 +237,10 @@ export default function App() {
         setTimeout(() => setSeekTime(null), 100);
       }
     }
-  };
+  }, [activeTrack, repeatMode]);
 
   // Handler for track ending (from YT Player state callback)
-  const handleTrackEnded = () => {
+  const handleTrackEnded = useCallback(() => {
     if (repeatMode === "one") {
       setSeekTime(0);
       setTimeout(() => setSeekTime(null), 100);
@@ -254,18 +248,18 @@ export default function App() {
     } else {
       handleNext();
     }
-  };
+  }, [repeatMode, handleNext]);
 
   // Progress Bar Drag Seeking Handler
-  const handleSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSeekChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const targetVal = parseFloat(e.target.value);
     setCurrentTime(targetVal);
-  };
+  }, []);
 
-  const handleSeekEnd = (e: React.MouseEvent<HTMLInputElement> | React.TouchEvent<HTMLInputElement>) => {
+  const handleSeekEnd = useCallback(() => {
     setSeekTime(currentTime);
     setTimeout(() => setSeekTime(null), 100);
-  };
+  }, [currentTime]);
 
   return (
     <div className="relative min-h-screen text-zinc-100 flex flex-col justify-between overflow-x-hidden select-none">
@@ -344,7 +338,7 @@ export default function App() {
                   <input
                     type="range"
                     min="0"
-                    max={duration || 100}
+                    max={duration || 0}
                     value={currentTime}
                     onChange={handleSeekChange}
                     onMouseUp={handleSeekEnd}
@@ -354,7 +348,7 @@ export default function App() {
                   {/* Visual Filled Stream Progress */}
                   <div 
                     className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-red-600 rounded-lg pointer-events-none"
-                    style={{ width: `${(currentTime / (duration || 100)) * 100}%` }}
+                    style={{ width: duration > 0 ? `${(currentTime / duration) * 100}%` : "0%" }}
                   />
                 </div>
 
