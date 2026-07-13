@@ -5,31 +5,25 @@ interface CardRadialSpectrogramProps {
   isPlaying: boolean;
 }
 
-const BAR_COUNT = 30;
+const BAR_COUNT = 16;
 const R_START = 210;
+const EXTENSIONS = [12, 20, 30, 18, 14, 25, 38, 22, 32, 16, 24, 35, 28, 15, 26, 40];
 
 export default function CardRadialSpectrogram({ isPlaying }: CardRadialSpectrogramProps) {
   const bars = React.useMemo(() => {
     return Array.from({ length: BAR_COUNT }).map((_, i) => {
       const angle = (i * 360) / BAR_COUNT;
       const angleRad = (angle * Math.PI) / 180;
-      const randomExtension = 10 + Math.random() * 32;
-
-      const x1 = 250 + R_START * Math.cos(angleRad);
-      const y1 = 250 + R_START * Math.sin(angleRad);
-      const baseX2 = 250 + (R_START + 3) * Math.cos(angleRad);
-      const baseY2 = 250 + (R_START + 3) * Math.sin(angleRad);
-      const maxX2 = 250 + (R_START + randomExtension) * Math.cos(angleRad);
-      const maxY2 = 250 + (R_START + randomExtension) * Math.sin(angleRad);
+      const ext = EXTENSIONS[i];
 
       return {
         i,
-        x1,
-        y1,
-        baseX2,
-        baseY2,
-        maxX2,
-        maxY2,
+        x1: 250 + R_START * Math.cos(angleRad),
+        y1: 250 + R_START * Math.sin(angleRad),
+        baseX2: 250 + (R_START + 3) * Math.cos(angleRad),
+        baseY2: 250 + (R_START + 3) * Math.sin(angleRad),
+        maxX2: 250 + (R_START + ext) * Math.cos(angleRad),
+        maxY2: 250 + (R_START + ext) * Math.sin(angleRad),
         duration: 0.35 + (i % 7) * 0.08,
         color: i % 3 === 0 ? "#ef4444" : i % 3 === 1 ? "#dc2626" : "#7f1d1d"
       };
@@ -82,14 +76,8 @@ export default function CardRadialSpectrogram({ isPlaying }: CardRadialSpectrogr
         </svg>
       </div>
 
-      <motion.div
-        animate={{ rotate: isPlaying ? 360 : 0 }}
-        transition={{
-          repeat: Infinity,
-          duration: 35,
-          ease: "linear"
-        }}
-        className="absolute w-[130%] h-[130%] pointer-events-none flex items-center justify-center opacity-40"
+      <div
+        className={`absolute w-[130%] h-[130%] pointer-events-none flex items-center justify-center opacity-40 ${isPlaying ? "animate-spin-ultra-slow" : ""}`}
       >
         <svg viewBox="0 0 500 500" className="w-full h-full">
           <path
@@ -103,7 +91,7 @@ export default function CardRadialSpectrogram({ isPlaying }: CardRadialSpectrogr
             </textPath>
           </text>
         </svg>
-      </motion.div>
+        </div>
     </div>
   );
 }

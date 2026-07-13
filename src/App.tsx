@@ -5,7 +5,7 @@ import DiaDoRockCover from "./components/DiaDoRockCover";
 import CardRadialSpectrogram from "./components/CardRadialSpectrogram";
 import CardBackgroundSpectrogram from "./components/CardBackgroundSpectrogram";
 import FlatPlaylist from "./components/FlatPlaylist";
-import bgImage from "./assets/images/rock_radio_bg_1783539455652.jpg";
+import bgImage from "./assets/images/rock_radio_bg_1783539455652.webp";
 import {
   Play,
   Pause,
@@ -20,36 +20,34 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
+function findCurrentIndex(searchQuery: string): { actIndex: number; trackIndex: number } | null {
+  for (let a = 0; a < playlistData.length; a++) {
+    const tIndex = playlistData[a].tracks.findIndex((t) => t.searchQuery === searchQuery);
+    if (tIndex !== -1) return { actIndex: a, trackIndex: tIndex };
+  }
+  return null;
+}
+
 export default function App() {
-  // 1. Master Playback States
   const [activeAct, setActiveAct] = useState<Act>(playlistData[0]);
   const [activeTrack, setActiveTrack] = useState<Track>(playlistData[0].tracks[0]);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [volume, setVolume] = useState<number>(75);
   const [isMuted, setIsMuted] = useState<boolean>(false);
-
-  // Time & Seeking States
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
   const [seekTime, setSeekTime] = useState<number | null>(null);
-
-  // Repeat & Shuffle Modes
   const [isShuffle, setIsShuffle] = useState<boolean>(false);
   const [repeatMode, setRepeatMode] = useState<"none" | "one" | "all">("all");
-
-  // Auxiliary and helper states
   const [resolvedVideoId, setResolvedVideoId] = useState<string | null>(null);
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState<boolean>(false);
 
-  // Pre-fetch next track for smoother transitions
   useEffect(() => {
-    // Reset times on track changes
     setCurrentTime(0);
     setDuration(0);
   }, [activeTrack]);
 
-  // Formatting utilities
   const formatTime = (seconds: number) => {
     if (isNaN(seconds) || seconds === undefined) return "0:00";
     const mins = Math.floor(seconds / 60);
@@ -57,8 +55,7 @@ export default function App() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Helper to find the next track in the queue
-  const getNextTrack = (): { track: Track; act: Act } | null => {
+  function getNextTrack(): { track: Track; act: Act } | null {
     if (isShuffle) {
       const allTracks: { track: Track; act: Act }[] = [];
       playlistData.forEach((act) => {
@@ -74,38 +71,21 @@ export default function App() {
       return null;
     }
 
-    let foundActIndex = -1;
-    let foundTrackIndex = -1;
+    const idx = findCurrentIndex(activeTrack?.searchQuery ?? "");
+    if (!idx) return { track: playlistData[0].tracks[0], act: playlistData[0] };
 
-    for (let a = 0; a < playlistData.length; a++) {
-      const tIndex = playlistData[a].tracks.findIndex(
-        (t) => t.searchQuery === activeTrack?.searchQuery
-      );
-      if (tIndex !== -1) {
-        foundActIndex = a;
-        foundTrackIndex = tIndex;
-        break;
-      }
-    }
+    const currentAct = playlistData[idx.actIndex];
 
-    if (foundActIndex === -1 || foundTrackIndex === -1) {
-      return { track: playlistData[0].tracks[0], act: playlistData[0] };
-    }
-
-    const currentAct = playlistData[foundActIndex];
-
-    if (foundTrackIndex < currentAct.tracks.length - 1) {
-      return { track: currentAct.tracks[foundTrackIndex + 1], act: currentAct };
-    } else if (foundActIndex < playlistData.length - 1) {
-      const nextAct = playlistData[foundActIndex + 1];
+    if (idx.trackIndex < currentAct.tracks.length - 1) {
+      return { track: currentAct.tracks[idx.trackIndex + 1], act: currentAct };
+    } else if (idx.actIndex < playlistData.length - 1) {
+      const nextAct = playlistData[idx.actIndex + 1];
       return { track: nextAct.tracks[0], act: nextAct };
     } else {
-      if (repeatMode === "all") {
-        return { track: playlistData[0].tracks[0], act: playlistData[0] };
-      }
+      if (repeatMode === "all") return { track: playlistData[0].tracks[0], act: playlistData[0] };
       return null;
     }
-  };
+  }
 
   const nextTrackInfo = useMemo(() => getNextTrack(), [activeTrack, isShuffle, repeatMode]);
 
@@ -120,9 +100,7 @@ export default function App() {
     setIsPlaying(true);
   }, []);
 
-  // Skip Forward Logic
   const handleNext = useCallback(() => {
-    // A. Shuffle mode
     if (isShuffle) {
       const allTracks: { track: Track; act: Act }[] = [];
       playlistData.forEach((act) => {
@@ -130,112 +108,69 @@ export default function App() {
           allTracks.push({ track, act });
         });
       });
-      const randIndex = Math.floor(Math.random() * allTracks.length);
-      const selected = allTracks[randIndex];
+      const selected = allTracks[Math.floor(Math.random() * allTracks.length)];
       setActiveAct(selected.act);
       setActiveTrack(selected.track);
       setIsPlaying(true);
       return;
     }
 
-    // B. Linear mode - globally robust scanning
-    let foundActIndex = -1;
-    let foundTrackIndex = -1;
-
-    for (let a = 0; a < playlistData.length; a++) {
-      const tIndex = playlistData[a].tracks.findIndex(
-        (t) => t.searchQuery === activeTrack.searchQuery
-      );
-      if (tIndex !== -1) {
-        foundActIndex = a;
-        foundTrackIndex = tIndex;
-        break;
-      }
-    }
-
-    if (foundActIndex === -1 || foundTrackIndex === -1) {
-      // Fallback
+    const idx = findCurrentIndex(activeTrack.searchQuery);
+    if (!idx) {
       setActiveAct(playlistData[0]);
       setActiveTrack(playlistData[0].tracks[0]);
       setIsPlaying(true);
       return;
     }
 
-    const currentAct = playlistData[foundActIndex];
+    const currentAct = playlistData[idx.actIndex];
 
-    if (foundTrackIndex < currentAct.tracks.length - 1) {
-      // Next song in same act
+    if (idx.trackIndex < currentAct.tracks.length - 1) {
       setActiveAct(currentAct);
-      setActiveTrack(currentAct.tracks[foundTrackIndex + 1]);
+      setActiveTrack(currentAct.tracks[idx.trackIndex + 1]);
       setIsPlaying(true);
-    } else if (foundActIndex < playlistData.length - 1) {
-      // First song of next act
-      const nextAct = playlistData[foundActIndex + 1];
+    } else if (idx.actIndex < playlistData.length - 1) {
+      const nextAct = playlistData[idx.actIndex + 1];
       setActiveAct(nextAct);
       setActiveTrack(nextAct.tracks[0]);
       setIsPlaying(true);
+    } else if (repeatMode === "all") {
+      setActiveAct(playlistData[0]);
+      setActiveTrack(playlistData[0].tracks[0]);
+      setIsPlaying(true);
     } else {
-      // End of overall playlist
-      if (repeatMode === "all") {
-        setActiveAct(playlistData[0]);
-        setActiveTrack(playlistData[0].tracks[0]);
-        setIsPlaying(true);
-      } else {
-        setIsPlaying(false);
-      }
+      setIsPlaying(false);
     }
   }, [isShuffle, repeatMode, activeTrack]);
 
-  // Skip Backward Logic
   const handlePrev = useCallback(() => {
-    let foundActIndex = -1;
-    let foundTrackIndex = -1;
-
-    for (let a = 0; a < playlistData.length; a++) {
-      const tIndex = playlistData[a].tracks.findIndex(
-        (t) => t.searchQuery === activeTrack.searchQuery
-      );
-      if (tIndex !== -1) {
-        foundActIndex = a;
-        foundTrackIndex = tIndex;
-        break;
-      }
-    }
-
-    if (foundActIndex === -1 || foundTrackIndex === -1) {
-      // Fallback
+    const idx = findCurrentIndex(activeTrack.searchQuery);
+    if (!idx) {
       setActiveAct(playlistData[0]);
       setActiveTrack(playlistData[0].tracks[0]);
       setIsPlaying(true);
       return;
     }
 
-    const currentAct = playlistData[foundActIndex];
+    const currentAct = playlistData[idx.actIndex];
 
-    if (foundTrackIndex > 0) {
-      // Previous song in same act
+    if (idx.trackIndex > 0) {
       setActiveAct(currentAct);
-      setActiveTrack(currentAct.tracks[foundTrackIndex - 1]);
+      setActiveTrack(currentAct.tracks[idx.trackIndex - 1]);
       setIsPlaying(true);
-    } else if (foundActIndex > 0) {
-      // Last song of previous act
-      const prevAct = playlistData[foundActIndex - 1];
+    } else if (idx.actIndex > 0) {
+      const prevAct = playlistData[idx.actIndex - 1];
       setActiveAct(prevAct);
       setActiveTrack(prevAct.tracks[prevAct.tracks.length - 1]);
       setIsPlaying(true);
+    } else if (repeatMode === "all") {
+      const lastAct = playlistData[playlistData.length - 1];
+      setActiveAct(lastAct);
+      setActiveTrack(lastAct.tracks[lastAct.tracks.length - 1]);
+      setIsPlaying(true);
     } else {
-      // Wrap around to the absolute end if repeatAll is active
-      if (repeatMode === "all") {
-        const lastAct = playlistData[playlistData.length - 1];
-        setActiveAct(lastAct);
-        setActiveTrack(lastAct.tracks[lastAct.tracks.length - 1]);
-        setIsPlaying(true);
-      } else {
-        // Just reset current track to beginning
-        setSeekTime(0);
-        // Clear immediately so it can be re-triggered
-        setTimeout(() => setSeekTime(null), 100);
-      }
+      setSeekTime(0);
+      setTimeout(() => setSeekTime(null), 100);
     }
   }, [activeTrack, repeatMode]);
 

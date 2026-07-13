@@ -20,3 +20,33 @@
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: #dc2626;
 }
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes spin-very-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 4s linear infinite;
+}
+
+.animate-spin-very-slow {
+  animation: spin-very-slow 25s linear infinite;
+}
+
+.animate-spin-ultra-slow {
+  animation: spin-very-slow 35s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin-slow,
+  .animate-spin-very-slow,
+  .animate-spin-ultra-slow {
+    animation: none;
+  }
+}

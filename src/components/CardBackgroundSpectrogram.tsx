@@ -5,35 +5,24 @@ interface CardBackgroundSpectrogramProps {
   isPlaying: boolean;
 }
 
+const BAR_HEIGHTS = [35, 55, 78, 42, 28, 65, 90, 48, 72, 38, 60, 85, 50, 30, 70, 95];
+
 export default function CardBackgroundSpectrogram({ isPlaying }: CardBackgroundSpectrogramProps) {
-  const barCount = 24;
+  const barCount = 16;
   const bars = React.useMemo(() => {
     return Array.from({ length: barCount }).map((_, i) => {
       const duration = 0.35 + (i % 6) * 0.07;
       const delay = (i % 5) * 0.05;
-      const randomHeight = 15 + Math.random() * 80;
 
       let multiplier = 1.0;
-      if (i < barCount * 0.2) {
-        multiplier = 1.45;
-      } else if (i < barCount * 0.5) {
-        multiplier = 1.2;
-      } else if (i > barCount * 0.8) {
-        multiplier = 0.75;
-      } else {
-        multiplier = 1.05;
-      }
+      if (i < barCount * 0.2) multiplier = 1.45;
+      else if (i < barCount * 0.5) multiplier = 1.2;
+      else if (i > barCount * 0.8) multiplier = 0.75;
+      else multiplier = 1.05;
 
-      const maxHeight = Math.min(98, Math.floor(randomHeight * multiplier));
+      const maxHeight = Math.min(98, Math.floor(BAR_HEIGHTS[i] * multiplier));
 
-      return {
-        id: i,
-        duration,
-        delay,
-        maxHeight,
-        minHeight: 8,
-        staticHeight: 5,
-      };
+      return { id: i, duration, delay, maxHeight, minHeight: 8, staticHeight: 5 };
     });
   }, [barCount]);
 

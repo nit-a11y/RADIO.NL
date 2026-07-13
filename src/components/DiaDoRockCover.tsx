@@ -6,7 +6,7 @@ interface DiaDoRockCoverProps {
 }
 
 export default function DiaDoRockCover({ isPlaying }: DiaDoRockCoverProps) {
-  const numberOfBars = 36;
+  const numberOfBars = 16;
   const bars = React.useMemo(() => {
     return Array.from({ length: numberOfBars }).map((_, i) => {
       const angle = (i * 360) / numberOfBars;
@@ -20,7 +20,6 @@ export default function DiaDoRockCover({ isPlaying }: DiaDoRockCoverProps) {
         maxY2: 150 + (rStart + 8 + (i % 11) * 2) * Math.sin(angleRad),
         x1: 150 + rStart * Math.cos(angleRad),
         y1: 150 + rStart * Math.sin(angleRad),
-        angleRad,
         color: i % 3 === 0 ? "#ef4444" : i % 3 === 1 ? "#dc2626" : "#7f1d1d",
       };
     });
@@ -71,17 +70,9 @@ export default function DiaDoRockCover({ isPlaying }: DiaDoRockCoverProps) {
         </svg>
       </div>
 
-      {/* 2. Slow Rotating Brand Ring wrapping just outside the Vinyl Edge */}
-      <motion.div
-        animate={{
-          rotate: isPlaying ? 360 : 0
-        }}
-        transition={{
-          repeat: Infinity,
-          duration: 25,
-          ease: "linear"
-        }}
-        className="absolute inset-0 w-full h-full pointer-events-none z-20 flex items-center justify-center"
+      {/* 2. Slow Rotating Brand Ring (CSS animation) */}
+      <div
+        className={`absolute inset-0 w-full h-full pointer-events-none z-20 flex items-center justify-center ${isPlaying ? "animate-spin-very-slow" : ""}`}
       >
         <svg viewBox="0 0 300 300" className="w-[110%] h-[110%]">
           <path
@@ -95,22 +86,14 @@ export default function DiaDoRockCover({ isPlaying }: DiaDoRockCoverProps) {
             </textPath>
           </text>
         </svg>
-      </motion.div>
+      </div>
 
       {/* 3. The SPINNING VINYL RECORD DISK */}
       <div className="relative w-[84%] h-[84%] rounded-full shadow-[0_15px_45px_rgba(0,0,0,0.95),0_0_25px_rgba(239,68,68,0.15)] flex items-center justify-center overflow-hidden z-10 border border-zinc-800">
         
-        {/* Main rotating vinyl container */}
-        <motion.div
-          animate={{
-            rotate: isPlaying ? 360 : 0,
-          }}
-          transition={{
-            duration: 4, // Realistic vinyl rotation speed (~4 seconds)
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          className="absolute inset-0 w-full h-full rounded-full bg-neutral-950 flex items-center justify-center"
+        {/* Main rotating vinyl container (CSS animation) */}
+        <div
+          className={`absolute inset-0 w-full h-full rounded-full bg-neutral-950 flex items-center justify-center ${isPlaying ? "animate-spin-slow" : ""}`}
         >
           {/* Vinyl Grooves - Render multiple distinct rings */}
           <div className="absolute inset-[3%] rounded-full border border-zinc-900/40" />
@@ -150,7 +133,7 @@ export default function DiaDoRockCover({ isPlaying }: DiaDoRockCoverProps) {
 
           {/* Tiny center details on label */}
           <div className="absolute w-[18%] h-[18%] rounded-full border border-red-950/40 z-20" />
-        </motion.div>
+        </div>
 
         {/* 4. STATIC REALISTIC GLOSSY LIGHT REFLECTIONS (Does not spin, mimicking actual physical light reflection!) */}
         <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_45deg,transparent_0deg,rgba(255,255,255,0.06)_40deg,transparent_80deg,transparent_180deg,rgba(255,255,255,0.06)_220deg,transparent_260deg)] pointer-events-none z-20" />
